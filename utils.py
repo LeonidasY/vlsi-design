@@ -12,6 +12,25 @@ def import_instances(folder):
             content = [x.strip() for x in content] 
             instances.append(content)
     return instances
+    
+# Method to output the solution
+# EX: output_solution('output/cp/', ['8', '4', '3 3', '3 5', '5 3', '5 5'], 0, [5, 5, 0, 0], [5, 0, 5, 0], 8)
+def output_solution(folder, instances, number, start_x, start_y, end_y):
+    solution = []
+    for i, x in enumerate(instances[number]):
+        if i == 0:
+            solution.append(x + ' ' + str(end_y))
+        elif i == 1:
+            solution.append(x)
+        else:
+            solution.append(x + ' ' + str(start_x[i-2]) + ' ' + str(start_y[i-2]))
+    
+    print(solution)
+    
+    with open(folder + f'out-{number}.txt', 'w') as output:
+        for item in solution:
+            output.write(item)
+            output.write('\n')
 
 # Method used to plot the solution
 # EX: plot_solution(9, 12, 5, [[3, 3, 4, 0],[2, 4, 7, 0],[2, 8, 7, 4],[3, 9, 4, 3],[4, 12, 0, 0 ]])
