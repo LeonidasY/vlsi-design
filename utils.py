@@ -1,6 +1,19 @@
+import os
 import matplotlib.pyplot as plt
 
-# method used to plot the solution
+# Method to import the instances
+# EX: import_instances('input/instances/')
+def import_instances(folder):
+    instances = []
+    files = os.listdir(folder)
+    for file in files:
+        with open(folder + file) as f:
+            content = f.readlines()
+            content = [x.strip() for x in content] 
+            instances.append(content)
+    return instances
+
+# Method used to plot the solution
 # EX: plot_solution(9, 12, 5, [[3, 3, 4, 0],[2, 4, 7, 0],[2, 8, 7, 4],[3, 9, 4, 3],[4, 12, 0, 0 ]])
 def plot_solution(width, height, n_circuits, circuits):
     SIZE = 5
