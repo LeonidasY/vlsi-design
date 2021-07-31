@@ -15,7 +15,7 @@ def import_instances(folder):
 
 # Method used to plot the solution
 # EX: plot_solution(9, 12, 5, [[3, 3, 4, 0],[2, 4, 7, 0],[2, 8, 7, 4],[3, 9, 4, 3],[4, 12, 0, 0 ]])
-def plot_solution(width, height, n_circuits, circuits):
+def plot_solution(width, height, n_circuits, circuits, file=None):
     SIZE = 5
     fig, ax = plt.subplots()
 
@@ -32,11 +32,16 @@ def plot_solution(width, height, n_circuits, circuits):
     ax.set_xticks(range(width + 1))
     ax.set_yticks(range(height + 1))
     ax.grid(color='b', linewidth = 1)
-    plt.show()
+    
+    if file is not None:
+        plt.savefig(file)
+        plt.close()
+    else:
+        plt.show()
     
 # Method to output the solution
 # EX: output_solution('output/cp/out-0.txt', ['8', '4', '3 3', '3 5', '5 3', '5 5'], [5, 5, 0, 0], [5, 0, 5, 0], 8)
-def output_solution(file, instance, start_x, start_y, end_y):
+def output_solution(instance, start_x, start_y, end_y, file):
     solution = []
     for i, x in enumerate(instance):
         if i == 0:
