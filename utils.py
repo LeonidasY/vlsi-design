@@ -14,10 +14,10 @@ def import_instances(folder):
     return instances
     
 # Method to output the solution
-# EX: output_solution('output/cp/', ['8', '4', '3 3', '3 5', '5 3', '5 5'], 0, [5, 5, 0, 0], [5, 0, 5, 0], 8)
-def output_solution(folder, instances, number, start_x, start_y, end_y):
+# EX: output_solution('output/cp/out-0.txt', ['8', '4', '3 3', '3 5', '5 3', '5 5'], [5, 5, 0, 0], [5, 0, 5, 0], 8)
+def output_solution(file, instance, start_x, start_y, end_y):
     solution = []
-    for i, x in enumerate(instances[number]):
+    for i, x in enumerate(instance):
         if i == 0:
             solution.append(x + ' ' + str(end_y))
         elif i == 1:
@@ -27,7 +27,7 @@ def output_solution(folder, instances, number, start_x, start_y, end_y):
     
     print(solution)
     
-    with open(folder + f'out-{number}.txt', 'w') as output:
+    with open(file, 'w') as output:
         for item in solution:
             output.write(item)
             output.write('\n')
