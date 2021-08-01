@@ -1,11 +1,20 @@
 import os
 import matplotlib.pyplot as plt
+import re
 
 # Method to import the instances
 # EX: import_instances('input/instances/')
 def import_instances(folder):
+
+    # Method to sort a list alphanumerically
+    def sorted_alphanumeric(data):
+        convert = lambda text: int(text) if text.isdigit() else text.lower()
+        alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+        return sorted(data, key=alphanum_key)
+        
     instances = []
-    files = os.listdir(folder)
+    files = sorted_alphanumeric(os.listdir(folder))
+    print(files)
     for file in files:
         with open(folder + file) as f:
             content = f.readlines()
