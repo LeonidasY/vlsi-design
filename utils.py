@@ -23,15 +23,16 @@ def import_instances(folder):
     return instances
 
 # Method used to plot the solution
-# EX: plot_solution(9, 12, 5, [[3, 3, 4, 0],[2, 4, 7, 0],[2, 8, 7, 4],[3, 9, 4, 3],[4, 12, 0, 0 ]])
-def plot_solution(width, height, n_circuits, circuits, file=None):
+# EX: plot_solution(9, 12, [[3, 3, 4, 0],[2, 4, 7, 0],[2, 8, 7, 4],[3, 9, 4, 3],[4, 12, 0, 0 ]])
+# To save the image plotted, add a location to the file argument. Note: image will not be shown when saved.
+def plot_solution(width, height, circuits, file=None):
     SIZE = 5
     fig, ax = plt.subplots()
 
     fig.set_size_inches(SIZE, SIZE * height / width)
 
     colors = ['tab:red','tab:orange', 'yellow', 'tab:green','tab:blue','tab:purple','tab:brown', 'tab:grey']
-    for i in range(n_circuits):
+    for i in range(len(circuits)):
         ax.broken_barh([(circuits[i][2], circuits[i][0])], (circuits[i][3], circuits[i][1]), 
                         facecolors=colors[i % len(colors)], 
                         edgecolors=("black"), 
@@ -50,11 +51,11 @@ def plot_solution(width, height, n_circuits, circuits, file=None):
     
 # Method to output the solution
 # EX: output_solution('output/cp/out-0.txt', ['8', '4', '3 3', '3 5', '5 3', '5 5'], [5, 5, 0, 0], [5, 0, 5, 0], 8)
-def output_solution(instance, start_x, start_y, end_y, file):
+def output_solution(instance, height, start_x, start_y, file):
     solution = []
     for i, x in enumerate(instance):
         if i == 0:
-            solution.append(x + ' ' + str(end_y))
+            solution.append(x + ' ' + str(height))
         elif i == 1:
             solution.append(x)
         else:
