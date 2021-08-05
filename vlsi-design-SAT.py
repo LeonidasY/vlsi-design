@@ -1,5 +1,6 @@
 from itertools import combinations
 from utils import import_instances, plot_solution, output_solution
+import time
 from z3 import *
 
 ## Data Input
@@ -45,12 +46,9 @@ def vlsi(s, height):
         for j in range(height):
             exactly_one(s, p[i][j])
 
+    # A circuit appears once in a position inside the plane
     for n in range(number_of_blocks):
-        # A circuit has only one position
-        exactly_one(s, [p[i][j][n] for i in range(width) for j in range(height)])
-
-        # A circuit stays inside the plane
-        s.add(at_least_one([p[i][j][n] for i in range(width - blocks_width[n] + 1) for j in range(height - blocks_height[n] + 1)]))
+        exactly_one(s, [p[i][j][n] for i in range(width - blocks_width[n] + 1) for j in range(height - blocks_height[n] + 1)])
 
     # The circuits can't overlap
     for n in range(number_of_blocks):
@@ -70,14 +68,17 @@ def vlsi(s, height):
                 for k in range(2*(number_of_blocks) + 1):
                     if m.evaluate(p[i][j][k]):
                         sol[i].append(k)
-        print(sol)
+        #print(sol)
     elif s.reason_unknown() == "timeout":
         print("Solver timeout")
     else:
         print("Failed to solve")
     return sol
 
+start = time.time()
+middle = start
 for instance_number in range(len(instances)):
+    print("Solved instance %i in %f seconds (%f sec)" %((instance_number- 1), (time.time() - start), (time.time() - middle)))	
     print("Solving instance: ", instance_number)
     number_of_blocks, blocks_width, blocks_height, width = get_variables(instance_number)
     starting_height = int(sum([blocks_width[i] * blocks_height[i] for i in range(number_of_blocks)]) / width)
@@ -87,6 +88,7 @@ for instance_number in range(len(instances)):
     times = 300 * 1000 # 300 sec
     s.set(timeout=times)
 
+    middle = time.time()
     sol = vlsi(s, height_i)
         
     if (sol) :
