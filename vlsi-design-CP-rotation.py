@@ -163,7 +163,7 @@ code = f"""
             u               % array of upper bounds
         );
 
-    solve satisfy;
+    solve :: int_search(kind, dom_w_deg, indomain_split) satisfy;
 """
 
 trivial = Model()
@@ -252,7 +252,7 @@ for n in tqdm(range(len(instances))):
                 u               % array of upper bounds
             );
 
-        solve satisfy;
+        solve :: int_search(kind, dom_w_deg, indomain_split) satisfy;
     """    
     
     trivial = Model()
