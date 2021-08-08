@@ -105,93 +105,93 @@ def get_circuits(block_widths, block_heights, max_width, max_height, start_x, st
         circuits.append([block_widths[i], block_heights[i], start_x[i], start_y[i]])
     return circuits            
 
-# Show a sample solution
-n = 0
-BLOCKS, BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+# # Show a sample solution
+# n = 0
+# BLOCKS, BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
-shape = get_shape(BLOCKS)
-valid_shapes = get_valid_shapes(BLOCKS)
-rect_size, dimensions = get_rect_size(BLOCK_WIDTHS, BLOCK_HEIGHTS)
-rect_offset = get_rect_offset(BLOCK_WIDTHS, BLOCK_HEIGHTS)
+# shape = get_shape(BLOCKS)
+# valid_shapes = get_valid_shapes(BLOCKS)
+# rect_size, dimensions = get_rect_size(BLOCK_WIDTHS, BLOCK_HEIGHTS)
+# rect_offset = get_rect_offset(BLOCK_WIDTHS, BLOCK_HEIGHTS)
 
-## MiniZinc Code
+# ## MiniZinc Code
 
-code = f"""
-    include "globals.mzn";
+# code = f"""
+    # include "globals.mzn";
 
-    % Variables initialisation
-    int: k;
-    int: nObjects;
-    int: nRectangles;
-    int: nShapes;
+    # % Variables initialisation
+    # int: k;
+    # int: nObjects;
+    # int: nRectangles;
+    # int: nShapes;
    
-    int: MAX_WIDTH;
-    int: MAX_HEIGHT;
+    # int: MAX_WIDTH;
+    # int: MAX_HEIGHT;
 
-    set of int: DIMENSIONS = 1..k;
-    set of int: OBJECTS    = 1..nObjects;
-    set of int: RECTANGLES = 1..nRectangles;
-    set of int: SHAPES     = 1..nShapes;
+    # set of int: DIMENSIONS = 1..k;
+    # set of int: OBJECTS    = 1..nObjects;
+    # set of int: RECTANGLES = 1..nRectangles;
+    # set of int: SHAPES     = 1..nShapes;
 
-    array[DIMENSIONS] of int:             l;
-    array[DIMENSIONS] of int:             u;
-    array[RECTANGLES,DIMENSIONS] of int:  rect_size = {rect_size};
-    array[RECTANGLES,DIMENSIONS] of int:  rect_offset = {rect_offset};
-    array[SHAPES] of set of RECTANGLES:   shape = {shape};
-    array[OBJECTS,DIMENSIONS] of var int: x;
-    array[OBJECTS] of var SHAPES:         kind;
+    # array[DIMENSIONS] of int:             l;
+    # array[DIMENSIONS] of int:             u;
+    # array[RECTANGLES,DIMENSIONS] of int:  rect_size = {rect_size};
+    # array[RECTANGLES,DIMENSIONS] of int:  rect_offset = {rect_offset};
+    # array[SHAPES] of set of RECTANGLES:   shape = {shape};
+    # array[OBJECTS,DIMENSIONS] of var int: x;
+    # array[OBJECTS] of var SHAPES:         kind;
 
-    l = [0, 0];
-    u = [MAX_WIDTH, MAX_HEIGHT];
+    # l = [0, 0];
+    # u = [MAX_WIDTH, MAX_HEIGHT];
     
-    array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
+    # array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
 
-    constraint forall (obj in OBJECTS)(
-        kind[obj] in valid_shapes[obj]
-    );
+    # constraint forall (obj in OBJECTS)(
+        # kind[obj] in valid_shapes[obj]
+    # );
     
-    constraint
-        geost_smallest_bb(
-            k,              % the number of dimensions
-            rect_size,      % the size of each box in k dimensions
-            rect_offset,    % the offset of each box from the base position in k dimensions
-            shape,          % the set of rectangles defining the i-th shape
-            x,              % the base position of each object.
-                            % (var) x[i,j] is the position of object i in dimension j
-            kind,           % (var) the shape used by each object
-            l,              % array of lower bounds
-            u               % array of upper bounds
-        );
-
-    solve :: int_search(kind, dom_w_deg, indomain_split) satisfy;
-"""
-
-trivial = Model()
-trivial.add_string(code)
-
-timeout = time.time() + 60*5
-
-instance = Instance(gecode, trivial)
-
-instance['k'] = 2
-instance['nObjects'] = len(BLOCKS)
-instance['nRectangles'] = len(BLOCKS) * 2
-instance['nShapes'] = len(BLOCKS) * 2
-instance['MAX_WIDTH'] = MAX_WIDTH
-instance['MAX_HEIGHT'] = MAX_HEIGHT
-
-result = instance.solve(timeout=timedelta(minutes=5))
-
-if time.time() >= timeout:
-    print(f'Instance-{n} Fail: Timeout')
-else:
-    x = result['x']
-    kind = result['kind']
+    # constraint
+        # geost_smallest_bb(
+            # k,              % the number of dimensions
+            # rect_size,      % the size of each box in k dimensions
+            # rect_offset,    % the offset of each box from the base position in k dimensions
+            # shape,          % the set of rectangles defining the i-th shape
+            # x,              % the base position of each object.
+                            # % (var) x[i,j] is the position of object i in dimension j
+            # kind,           % (var) the shape used by each object
+            # l,              % array of lower bounds
+            # u               % array of upper bounds
+        # );
     
-    block_widths, block_heights, start_x, start_y = get_solution(dimensions, x, kind)
+    # solve :: int_search(kind, most_constrained, indomain_min) satisfy;
+# """
+
+# trivial = Model()
+# trivial.add_string(code)
+
+# timeout = time.time() + 60*5
+
+# instance = Instance(gecode, trivial)
+
+# instance['k'] = 2
+# instance['nObjects'] = len(BLOCKS)
+# instance['nRectangles'] = len(BLOCKS) * 2
+# instance['nShapes'] = len(BLOCKS) * 2
+# instance['MAX_WIDTH'] = MAX_WIDTH
+# instance['MAX_HEIGHT'] = MAX_HEIGHT
+
+# result = instance.solve(timeout=timedelta(minutes=5), processes=4)
+
+# if time.time() >= timeout:
+    # print(f'Instance-{n} Fail: Timeout')
+# else:
+    # x = result['x']
+    # kind = result['kind']
     
-    circuits = get_circuits(block_widths, block_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-    plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
+    # block_widths, block_heights, start_x, start_y = get_solution(dimensions, x, kind)
+    
+    # circuits = get_circuits(block_widths, block_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
+    # plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
     
 ## Data Output
 
@@ -252,7 +252,7 @@ for n in tqdm(range(len(instances))):
                 u               % array of upper bounds
             );
 
-        solve :: int_search(kind, dom_w_deg, indomain_split) satisfy;
+        solve :: int_search(kind, most_constrained, indomain_min) satisfy;
     """    
     
     trivial = Model()
@@ -269,7 +269,7 @@ for n in tqdm(range(len(instances))):
     instance['MAX_WIDTH'] = MAX_WIDTH
     instance['MAX_HEIGHT'] = MAX_HEIGHT
 
-    result = instance.solve(timeout=timedelta(minutes=5))
+    result = instance.solve(timeout=timedelta(minutes=5), processes=4)
     
     if time.time() >= timeout:
         print(f'Instance-{n+1} Fail: Timeout')

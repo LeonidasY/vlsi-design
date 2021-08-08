@@ -71,37 +71,39 @@ code = """
     constraint diffn(start_x, start_y, BLOCK_WIDTHS, BLOCK_HEIGHTS);
 
     % Search strategy
-    solve :: seq_search([int_search(start_x, dom_w_deg, indomain_split), 
-                         int_search(start_y, dom_w_deg, indomain_split)]) satisfy;
+    solve :: seq_search([int_search(start_x, most_constrained, indomain_min), 
+                         int_search(start_y, most_constrained, indomain_min)])
+    satisfy;
 """
 
-# Show a sample solution
-n = 0
-BLOCKS, BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+# # Show a sample solution
+# n = 0
+# BLOCKS, BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
-trivial = Model()
-trivial.add_string(code)
+# trivial = Model()
+# trivial.add_string(code)
 
-timeout = time.time() + 60*5
+# timeout = time.time() + 60*5
 
-instance = Instance(gecode, trivial)
+# instance = Instance(gecode, trivial)
 
-instance['BLOCKS'] = BLOCKS
-instance['BLOCK_WIDTHS'] = BLOCK_WIDTHS
-instance['BLOCK_HEIGHTS'] = BLOCK_HEIGHTS
-instance['MAX_WIDTH'] = MAX_WIDTH
-instance['MAX_HEIGHT'] = MAX_HEIGHT
+# instance['BLOCKS'] = BLOCKS
+# instance['BLOCK_WIDTHS'] = BLOCK_WIDTHS
+# instance['BLOCK_HEIGHTS'] = BLOCK_HEIGHTS
+# instance['MAX_WIDTH'] = MAX_WIDTH
+# instance['MAX_HEIGHT'] = MAX_HEIGHT
 
-result = instance.solve(timeout=timedelta(minutes=5))
+# result = instance.solve(timeout=timedelta(minutes=5), processes=4)
+# print(len(result))
 
-start_x = result['start_x']
-start_y = result['start_y']
-
-if time.time() >= timeout:
-    print(f'Instance-{n} Fail: Timeout')
-else:
-    circuits = get_circuits(BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-    plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
+# if time.time() >= timeout:
+    # print(f'Instance-{n} Fail: Timeout')
+# else:
+    # start_x = result['start_x']
+    # start_y = result['start_y']
+    
+    # circuits = get_circuits(BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
+    # plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
    
 ## Data Output
 
@@ -121,7 +123,7 @@ for n in tqdm(range(len(instances))):
     instance['MAX_WIDTH'] = MAX_WIDTH
     instance['MAX_HEIGHT'] = MAX_HEIGHT
     
-    result = instance.solve(timeout=timedelta(minutes=5))
+    result = instance.solve(timeout=timedelta(minutes=5), processes=4)
     
     if time.time() >= timeout:
         print(f'Instance-{n+1} Fail: Timeout')
