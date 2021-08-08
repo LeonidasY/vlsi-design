@@ -97,7 +97,6 @@ code = """
 # instance['MAX_HEIGHT'] = MAX_HEIGHT
 
 # result = instance.solve(timeout=timedelta(minutes=5), processes=4)
-# print(len(result))
 
 # if time.time() >= timeout:
     # print(f'Instance-{n} Fail: Timeout')
