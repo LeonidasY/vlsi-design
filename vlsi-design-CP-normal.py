@@ -69,6 +69,9 @@ code = """
 
     % Constraint to remove overlaps
     constraint diffn(start_x, start_y, BLOCK_WIDTHS, BLOCK_HEIGHTS);
+    
+    % Symmetry breaking
+    constraint lex_lesseq(start_y, reverse(start_y));
 
     % Search strategy
     solve :: seq_search([int_search(start_x, most_constrained, indomain_min), 
