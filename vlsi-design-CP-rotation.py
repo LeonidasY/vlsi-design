@@ -13,65 +13,65 @@ instances = import_instances('input/instances/')
 ## Functions
 
 def get_variables(instances, number):
-    # Get the number of blocks
-    blocks = []
+    # Get the number of circuits
+    circuits = []
     for n in range(int(instances[number][1])):
-        blocks.append(f'Block {n}')
+        circuits.append(f'Block {n}')
     
-    # Get block lengths and heights
-    block_widths = []
-    block_heights = []
+    # Get circuit lengths and heights
+    circuit_widths = []
+    circuit_heights = []
 
     for value in instances[number][2:]:
         width, height = value.split(' ')
-        block_widths.append(int(width))
-        block_heights.append(int(height))
+        circuit_widths.append(int(width))
+        circuit_heights.append(int(height))
     
     # Get the maximum width and height
     max_width = int(instances[number][0])
     
     total_area = 0
     for n in range(int(instances[number][1])):
-        total_area += block_widths[n] * block_heights[n]
+        total_area += circuit_widths[n] * circuit_heights[n]
     max_height = total_area // max_width
     
-    return blocks, block_widths, block_heights, max_width, max_height
+    return circuits, circuit_widths, circuit_heights, max_width, max_height
 
-def get_shape(blocks):
+def get_shape(circuits):
     shape = ''
-    for n in range(len(blocks)*2):
-        if n == len(blocks)*2-1:
+    for n in range(len(circuits)*2):
+        if n == len(circuits)*2-1:
             shape += f"{{{n+1}}}"
         else:
             shape += f"{{{n+1}}}, "
     shape = '[' + shape + ']'
     return shape
 
-def get_valid_shapes(blocks):
+def get_valid_shapes(circuits):
     valid_shapes = ''
-    for n in range(0, len(blocks)*2, 2):
-        if n == len(blocks)*2 - 2:
+    for n in range(0, len(circuits)*2, 2):
+        if n == len(circuits)*2 - 2:
             valid_shapes += f"{{{n+1}, {n+2}}}"
         else:
             valid_shapes += f"{{{n+1}, {n+2}}}, "
     valid_shapes = '[' + valid_shapes + ']'
     return valid_shapes
     
-def get_rect_size(block_widths, block_heights):
+def get_rect_size(circuit_widths, circuit_heights):
     rect_size = ''
     dimensions = []
-    for n in range(len(block_widths)):
-        rect_size += f"{block_widths[n]}, {block_heights[n]}|"
-        rect_size += f"{block_heights[n]}, {block_widths[n]}|"
+    for n in range(len(circuit_widths)):
+        rect_size += f"{circuit_widths[n]}, {circuit_heights[n]}|"
+        rect_size += f"{circuit_heights[n]}, {circuit_widths[n]}|"
         
-        dimensions.append([block_widths[n], block_heights[n]])
-        dimensions.append([block_heights[n], block_widths[n]])
+        dimensions.append([circuit_widths[n], circuit_heights[n]])
+        dimensions.append([circuit_heights[n], circuit_widths[n]])
     rect_size = '[|' + rect_size + '|]'
     return rect_size, dimensions
     
-def get_rect_offset(block_widths, block_heights):
+def get_rect_offset(circuit_widths, circuit_heights):
     rect_offset = ''
-    for n in range(len(block_widths)):
+    for n in range(len(circuit_widths)):
         rect_offset += f"{0}, {0}|"
         rect_offset += f"{0}, {0}|"
     rect_offset = '[|' + rect_offset + '|]' 
@@ -99,20 +99,20 @@ def output_solution(max_width, max_height, widths, heights, start_x, start_y, fi
             output.write(item)
             output.write('\n')  
 
-def get_circuits(block_widths, block_heights, max_width, max_height, start_x, start_y):
+def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x, start_y):
     circuits = []
     for i in range(len(start_x)):
-        circuits.append([block_widths[i], block_heights[i], start_x[i], start_y[i]])
+        circuits.append([circuit_widths[i], circuit_heights[i], start_x[i], start_y[i]])
     return circuits            
 
 # # Show a sample solution
 # n = 0
-# BLOCKS, BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+# CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
-# shape = get_shape(BLOCKS)
-# valid_shapes = get_valid_shapes(BLOCKS)
-# rect_size, dimensions = get_rect_size(BLOCK_WIDTHS, BLOCK_HEIGHTS)
-# rect_offset = get_rect_offset(BLOCK_WIDTHS, BLOCK_HEIGHTS)
+# shape = get_shape(CIRCUITS)
+# valid_shapes = get_valid_shapes(CIRCUITS)
+# rect_size, dimensions = get_rect_size(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
+# rect_offset = get_rect_offset(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
 
 # ## MiniZinc Code
 
@@ -172,9 +172,9 @@ def get_circuits(block_widths, block_heights, max_width, max_height, start_x, st
 # instance = Instance(gecode, trivial)
 
 # instance['k'] = 2
-# instance['nObjects'] = len(BLOCKS)
-# instance['nRectangles'] = len(BLOCKS) * 2
-# instance['nShapes'] = len(BLOCKS) * 2
+# instance['nObjects'] = len(CIRCUITS)
+# instance['nRectangles'] = len(CIRCUITS) * 2
+# instance['nShapes'] = len(CIRCUITS) * 2
 # instance['MAX_WIDTH'] = MAX_WIDTH
 # instance['MAX_HEIGHT'] = MAX_HEIGHT
 
@@ -186,20 +186,20 @@ def get_circuits(block_widths, block_heights, max_width, max_height, start_x, st
     # x = result['x']
     # kind = result['kind']
     
-    # block_widths, block_heights, start_x, start_y = get_solution(dimensions, x, kind)
+    # circuit_widths, circuit_heights, start_x, start_y = get_solution(dimensions, x, kind)
     
-    # circuits = get_circuits(block_widths, block_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
+    # circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
     # plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
     
 ## Data Output
 
 for n in tqdm(range(len(instances))):
-    BLOCKS, BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+    CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
-    shape = get_shape(BLOCKS)
-    valid_shapes = get_valid_shapes(BLOCKS)
-    rect_size, dimensions = get_rect_size(BLOCK_WIDTHS, BLOCK_HEIGHTS)
-    rect_offset = get_rect_offset(BLOCK_WIDTHS, BLOCK_HEIGHTS)
+    shape = get_shape(CIRCUITS)
+    valid_shapes = get_valid_shapes(CIRCUITS)
+    rect_size, dimensions = get_rect_size(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
+    rect_offset = get_rect_offset(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
     
     ## MiniZinc Code
 
@@ -259,9 +259,9 @@ for n in tqdm(range(len(instances))):
     instance = Instance(gecode, trivial)
 
     instance['k'] = 2
-    instance['nObjects'] = len(BLOCKS)
-    instance['nRectangles'] = len(BLOCKS) * 2
-    instance['nShapes'] = len(BLOCKS) * 2
+    instance['nObjects'] = len(CIRCUITS)
+    instance['nRectangles'] = len(CIRCUITS) * 2
+    instance['nShapes'] = len(CIRCUITS) * 2
     instance['MAX_WIDTH'] = MAX_WIDTH
     instance['MAX_HEIGHT'] = MAX_HEIGHT
 
@@ -273,8 +273,8 @@ for n in tqdm(range(len(instances))):
         x = result['x']
         kind = result['kind']
         
-        block_widths, block_heights, start_x, start_y = get_solution(dimensions, x, kind)
-        output_solution(MAX_WIDTH, MAX_HEIGHT, block_widths, block_heights, start_x, start_y, f'output/CP (Rotation)/solutions/out-{n+1}.txt')
+        circuit_widths, circuit_heights, start_x, start_y = get_solution(dimensions, x, kind)
+        output_solution(MAX_WIDTH, MAX_HEIGHT, circuit_widths, circuit_heights, start_x, start_y, f'output/CP (Rotation)/solutions/out-{n+1}.txt')
         
-        circuits = get_circuits(block_widths, block_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
+        circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
         plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits, f'output/CP (Rotation)/images/out-{n+1}.png')
