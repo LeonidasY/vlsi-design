@@ -146,22 +146,20 @@ def get_circuits(block_widths, block_heights, max_width, max_height, start_x, st
     
     # array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
 
-    # constraint forall (obj in OBJECTS)(
+    # constraint forall(obj in OBJECTS)(
         # kind[obj] in valid_shapes[obj]
     # );
     
-    # constraint
-        # geost_smallest_bb(
-            # k,              % the number of dimensions
-            # rect_size,      % the size of each box in k dimensions
-            # rect_offset,    % the offset of each box from the base position in k dimensions
-            # shape,          % the set of rectangles defining the i-th shape
-            # x,              % the base position of each object.
-                            # % (var) x[i,j] is the position of object i in dimension j
-            # kind,           % (var) the shape used by each object
-            # l,              % array of lower bounds
-            # u               % array of upper bounds
-        # );
+    # constraint geost_smallest_bb(
+        # k,
+        # rect_size,
+        # rect_offset,
+        # shape,
+        # x,
+        # kind,
+        # l,
+        # u
+    # );
     
     # solve :: int_search(kind, most_constrained, indomain_min) satisfy;
 # """
@@ -235,22 +233,20 @@ for n in tqdm(range(len(instances))):
         
         array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
 
-        constraint forall (obj in OBJECTS)(
+        constraint forall(obj in OBJECTS)(
             kind[obj] in valid_shapes[obj]
         );
         
-        constraint
-            geost_smallest_bb(
-                k,              % the number of dimensions
-                rect_size,      % the size of each box in k dimensions
-                rect_offset,    % the offset of each box from the base position in k dimensions
-                shape,          % the set of rectangles defining the i-th shape
-                x,              % the base position of each object.
-                                % (var) x[i,j] is the position of object i in dimension j
-                kind,           % (var) the shape used by each object
-                l,              % array of lower bounds
-                u               % array of upper bounds
-            );
+        constraint geost_smallest_bb(
+            k,
+            rect_size,
+            rect_offset,
+            shape,
+            x,
+            kind,
+            l,
+            u
+        );
 
         solve :: int_search(kind, most_constrained, indomain_min) satisfy;
     """    
