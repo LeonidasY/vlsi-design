@@ -278,7 +278,7 @@ for n in tqdm(range(len(instances))):
         kind = result['kind']
         
         block_widths, block_heights, start_x, start_y = get_solution(dimensions, x, kind)
-        output_solution(MAX_WIDTH, MAX_HEIGHT, block_widths, block_heights, start_x, start_y, f'output/CP/rotation/solutions/out-{n+1}.txt')
+        output_solution(MAX_WIDTH, MAX_HEIGHT, block_widths, block_heights, start_x, start_y, f'output/CP (Rotation)/solutions/out-{n+1}.txt')
         
         circuits = get_circuits(block_widths, block_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-        plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits, f'output/CP/rotation/images/out-{n+1}.png')
+        plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits, f'output/CP (Rotation)/images/out-{n+1}.png')

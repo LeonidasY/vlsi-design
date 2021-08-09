@@ -69,9 +69,6 @@ code = """
 
     % Constraint to remove overlaps
     constraint diffn(start_x, start_y, BLOCK_WIDTHS, BLOCK_HEIGHTS);
-    
-    % Symmetry breaking
-    constraint lex_lesseq(start_y, reverse(start_y));
 
     % Search strategy
     solve :: seq_search([int_search(start_x, most_constrained, indomain_min), 
@@ -133,7 +130,7 @@ for n in tqdm(range(len(instances))):
         start_x = result['start_x']
         start_y = result['start_y']
         
-        output_solution(instances[n], MAX_HEIGHT, start_x, start_y, f'output/CP/normal/solutions/out-{n+1}.txt')
+        output_solution(instances[n], MAX_HEIGHT, start_x, start_y, f'output/CP (Normal)/solutions/out-{n+1}.txt')
         
         circuits = get_circuits(BLOCK_WIDTHS, BLOCK_HEIGHTS, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-        plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits, f'output/CP/normal/images/out-{n+1}.png')
+        plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits, f'output/CP (Normal)/images/out-{n+1}.png')
