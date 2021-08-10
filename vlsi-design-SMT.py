@@ -6,9 +6,6 @@ from z3 import *
 ## Data Input
 
 instances = import_instances('input/instances/')
-
-# Functions
-
 def get_variables(instance_number):
     # Get the number of blocks
     number_of_circuits = int(instances[instance_number][1])
@@ -36,62 +33,62 @@ def vlsi(s, plate_height):
     H = 1   #the y-coordinate (or height)
 
     # each circuit's bottom-left corner needs to be in the grid and have all the circuit contained in the plate
-    inside = []
-    inside += [(And(v[n][W] + circuits_width[n] <= plate_width, 
-                    v[n][W] >= 0,
-                    v[n][H] + circuits_height[n] <= plate_height, 
-                    v[n][H] >= 0)) for n in range(number_of_circuits)]
+    inside = [(And( v[n][W] >= 0,
+                    v[n][W] + circuits_width[n] <= plate_width, 
+                    v[n][H] >= 0,
+                    v[n][H] + circuits_height[n] <= plate_height)) for n in range(number_of_circuits)]
 
-    # each circuit cannot overlap another circuit
+    # each circuit cannot overlap with another circuit
     overlap = []
     for n in range(number_of_circuits):
         for m in range(n + 1, number_of_circuits):
-            overlap.append((Or (v[n][W] + circuits_width[n] <= v[m][W],
-                                v[m][W] + circuits_width[m] <= v[n][W],
-                                v[n][H] + circuits_height[n] <= v[m][H],
-                                v[m][H] + circuits_height[m] <= v[n][H])))
+            overlap.append((Or( v[m][W] - v[n][W] >= circuits_width[n],
+                                v[n][W] - v[m][W] >= circuits_width[m],
+                                v[m][H] - v[n][H] >= circuits_height[n],
+                                v[n][H] - v[m][H] >= circuits_height[m])))
 
     # the sum of the horizontal/vertical sides of the traversed circuits, can be at most the one of the plate
     implied = []
     for i in range(plate_width):
-        implied.append( Sum(
-            [If(And(v[j][W] <= i, 
-                    i < v[j][W] + circuits_width[j]),
+        implied.append(sum(
+            [If(And(v[j][W] <= i, v[j][W] + circuits_width[j] > i),
                 circuits_height[j],
-                0) for j in range(number_of_circuits)]) <= plate_height)
+                0) for j in range(number_of_circuits)]) 
+                            <= plate_height)
 
     for i in range(plate_height):
-        implied.append(Sum(
-            [If(And(v[j][H] <= i, 
-                    i < v[j][H] + circuits_height[j]), 
-                circuits_width[j]
-                ,0) for j in range(number_of_circuits)]) <= plate_width)
+        implied.append(sum(
+            [If(And(v[j][H] <= i, v[j][H] + circuits_height[j] > i), 
+                circuits_width[j],
+                0) for j in range(number_of_circuits)]) 
+                            <= plate_width)
 
     vlsi_model = inside + overlap + implied
-
     s.add(vlsi_model)
     
     if s.check() == sat:
         m = s.model()
         return [[int(m.evaluate(v[i][j]).as_string()) for j in range(2)] for i in range(number_of_circuits)]
     else:
-        print("Failed to solve")
+        return 
 
-start = time.time()
-middle = start
+middle_time = time.time()
 for instance_number in range(len(instances)):
-    print("Solved instance %i in %f seconds (%f sec)" %((instance_number - 1), (time.time() - start), (time.time() - middle)))	
-    print("Solving instance: ", instance_number)
+    print("Solving instance: ", instance_number + 1)
     number_of_circuits, circuits_width, circuits_height, plate_width = get_variables(instance_number)
-    starting_height = int(math.ceil(sum([circuits_width[i] * circuits_height[i] for i in range(number_of_circuits)]) / plate_width))
-    height_i = starting_height
+    # to solve for model that 
+    plate_height = int(math.ceil(sum([circuits_width[i] * circuits_height[i] for i in range(number_of_circuits)]) / plate_width))
+    
     s = Solver()
 
+    #5 minutes limit for each instance to be solved
     times = 300 * 1000 # 300 sec
-    s.set(timeout=times)
+    s.set(timeout = times)
 
-    middle = time.time()
-    sol = vlsi(s, height_i)
+    middle_time = time.time()
+
+    #call of the function that solves the problem
+    sol = vlsi(s, plate_height)
         
     if (sol) :
         start_x = []
@@ -100,5 +97,8 @@ for instance_number in range(len(instances)):
             start_x.append(int(sol[j][0]))
             start_y.append(int(sol[j][1]))
         circuits = [[circuits_width[i], circuits_height[i], start_x[i], start_y[i]] for i in range(number_of_circuits)]
-        plot_solution(plate_width, height_i, circuits, f'output/SMT/images/out-{instance_number + 1}.png')
-        output_solution(instances[instance_number], height_i, start_x, start_y, f'output/SMT/solutions/out-{instance_number + 1}.txt')
+        plot_solution(plate_width, plate_height, circuits, f'output/SMT/images/out-{instance_number + 1}.png')
+        output_solution(instances[instance_number], plate_height, start_x, start_y, f'output/SMT/solutions/out-{instance_number + 1}.txt')
+        print("Solved instance %i in %.2f seconds" %((instance_number + 1), (time.time() - middle_time)))	
+    else:
+        print("Failed to solve instance %i" %(instance_number + 1))
