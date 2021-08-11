@@ -1,6 +1,7 @@
 # Import the necessary libraries
 from tqdm import tqdm
 from utils import import_instances, plot_solution, output_solution
+from collections import OrderedDict
 import time
 from datetime import timedelta
 from minizinc import Instance, Model, Solver
@@ -19,13 +20,24 @@ def get_variables(instances, number):
         circuits.append(f'Block {n}')
     
     # Get circuit lengths and heights
+    width_lst = []
+    height_lst = []
+    area = {}
+    for n, value in enumerate(instances[number][2:]):
+        width, height = value.split(' ')
+        
+        width_lst.append(int(width))
+        height_lst.append(int(height))
+        area[n] = int(width) * int(height)
+    
+    sort_area = OrderedDict(sorted(area.items(), key=lambda t: t[1]))
+    
     circuit_widths = []
     circuit_heights = []
 
-    for value in instances[number][2:]:
-        width, height = value.split(' ')
-        circuit_widths.append(int(width))
-        circuit_heights.append(int(height))
+    for i in sort_area.keys():
+        circuit_widths.append(int(width_lst[i]))
+        circuit_heights.append(int(height_lst[i]))
     
     # Get the maximum width and height
     max_width = int(instances[number][0])
