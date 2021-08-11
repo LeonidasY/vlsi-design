@@ -37,45 +37,47 @@ def get_variables(instances, number):
     
     return circuits, circuit_widths, circuit_heights, max_width, max_height
 
-def get_shape(circuits):
-    shape = ''
-    for n in range(len(circuits)*2):
-        if n == len(circuits)*2-1:
-            shape += f"{{{n+1}}}"
-        else:
-            shape += f"{{{n+1}}}, "
-    shape = '[' + shape + ']'
-    return shape
-
-def get_valid_shapes(circuits):
+def get_shapes(circuit_widths, circuit_heights):
+    shapes = ''
     valid_shapes = ''
-    for n in range(0, len(circuits)*2, 2):
-        if n == len(circuits)*2 - 2:
-            valid_shapes += f"{{{n+1}, {n+2}}}"
+    i = 1
+    
+    for n in range(len(circuit_widths)):
+        if circuit_widths[n] == circuit_heights[n]:
+            shapes += f"{{{i}}}, "
+            valid_shapes += f"{{{i}}}, "
+            i += 1        
         else:
-            valid_shapes += f"{{{n+1}, {n+2}}}, "
-    valid_shapes = '[' + valid_shapes + ']'
-    return valid_shapes
+            shapes += f"{{{i}}}, {{{i+1}}}, "
+            valid_shapes += f"{{{i}, {i+1}}}, "
+            i += 2
+    shapes = '[' + shapes[:-1] + ']'
+    valid_shapes = '[' + valid_shapes[:-1] + ']'
+    return shapes, valid_shapes
     
-def get_rect_size(circuit_widths, circuit_heights):
+def get_rectangles(circuit_widths, circuit_heights):
     rect_size = ''
-    dimensions = []
-    for n in range(len(circuit_widths)):
-        rect_size += f"{circuit_widths[n]}, {circuit_heights[n]}|"
-        rect_size += f"{circuit_heights[n]}, {circuit_widths[n]}|"
-        
-        dimensions.append([circuit_widths[n], circuit_heights[n]])
-        dimensions.append([circuit_heights[n], circuit_widths[n]])
-    rect_size = '[|' + rect_size + '|]'
-    return rect_size, dimensions
-    
-def get_rect_offset(circuit_widths, circuit_heights):
     rect_offset = ''
+    dimensions = []
+    
     for n in range(len(circuit_widths)):
-        rect_offset += f"{0}, {0}|"
-        rect_offset += f"{0}, {0}|"
-    rect_offset = '[|' + rect_offset + '|]' 
-    return rect_offset
+        if circuit_widths[n] == circuit_heights[n]:
+            rect_size += f"{circuit_widths[n]}, {circuit_heights[n]}|"
+            rect_offset += f"{0}, {0}|"
+            dimensions.append([circuit_widths[n], circuit_heights[n]])
+        
+        else:
+            rect_size += f"{circuit_widths[n]}, {circuit_heights[n]}|"
+            rect_size += f"{circuit_heights[n]}, {circuit_widths[n]}|"
+            
+            rect_offset += f"{0}, {0}|"
+            rect_offset += f"{0}, {0}|"
+            
+            dimensions.append([circuit_widths[n], circuit_heights[n]])
+            dimensions.append([circuit_heights[n], circuit_widths[n]])
+    rect_size = '[|' + rect_size[:-1] + '|]'
+    rect_offset = '[|' + rect_offset[:-1] + '|]' 
+    return rect_size, rect_offset, dimensions
     
 def get_solution(dimensions, x, kind):
     widths = []
@@ -109,10 +111,8 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
 # n = 0
 # CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
-# shape = get_shape(CIRCUITS)
-# valid_shapes = get_valid_shapes(CIRCUITS)
-# rect_size, dimensions = get_rect_size(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
-# rect_offset = get_rect_offset(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
+# shapes, valid_shapes = get_shapes(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
+# rect_size, rect_offset, dimensions = get_rectangles(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
 
 # ## MiniZinc Code
 
@@ -137,7 +137,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     # array[DIMENSIONS] of int:             u;
     # array[RECTANGLES,DIMENSIONS] of int:  rect_size = {rect_size};
     # array[RECTANGLES,DIMENSIONS] of int:  rect_offset = {rect_offset};
-    # array[SHAPES] of set of RECTANGLES:   shape = {shape};
+    # array[SHAPES] of set of RECTANGLES:   shapes = {shapes};
     # array[OBJECTS,DIMENSIONS] of var int: x;
     # array[OBJECTS] of var SHAPES:         kind;
 
@@ -154,7 +154,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
         # k,
         # rect_size,
         # rect_offset,
-        # shape,
+        # shapes,
         # x,
         # kind,
         # l,
@@ -173,8 +173,8 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
 
 # instance['k'] = 2
 # instance['nObjects'] = len(CIRCUITS)
-# instance['nRectangles'] = len(CIRCUITS) * 2
-# instance['nShapes'] = len(CIRCUITS) * 2
+# instance['nRectangles'] = len(dimensions)
+# instance['nShapes'] = len(dimensions)
 # instance['MAX_WIDTH'] = MAX_WIDTH
 # instance['MAX_HEIGHT'] = MAX_HEIGHT
 
@@ -196,10 +196,8 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
 for n in tqdm(range(len(instances))):
     CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
-    shape = get_shape(CIRCUITS)
-    valid_shapes = get_valid_shapes(CIRCUITS)
-    rect_size, dimensions = get_rect_size(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
-    rect_offset = get_rect_offset(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
+    shapes, valid_shapes = get_shapes(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
+    rect_size, rect_offset, dimensions = get_rectangles(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
     
     ## MiniZinc Code
 
@@ -224,7 +222,7 @@ for n in tqdm(range(len(instances))):
         array[DIMENSIONS] of int:             u;
         array[RECTANGLES,DIMENSIONS] of int:  rect_size = {rect_size};
         array[RECTANGLES,DIMENSIONS] of int:  rect_offset = {rect_offset};
-        array[SHAPES] of set of RECTANGLES:   shape = {shape};
+        array[SHAPES] of set of RECTANGLES:   shapes = {shapes};
         array[OBJECTS,DIMENSIONS] of var int: x;
         array[OBJECTS] of var SHAPES:         kind;
 
@@ -241,7 +239,7 @@ for n in tqdm(range(len(instances))):
             k,
             rect_size,
             rect_offset,
-            shape,
+            shapes,
             x,
             kind,
             l,
@@ -260,11 +258,11 @@ for n in tqdm(range(len(instances))):
 
     instance['k'] = 2
     instance['nObjects'] = len(CIRCUITS)
-    instance['nRectangles'] = len(CIRCUITS) * 2
-    instance['nShapes'] = len(CIRCUITS) * 2
+    instance['nRectangles'] = len(dimensions)
+    instance['nShapes'] = len(dimensions)
     instance['MAX_WIDTH'] = MAX_WIDTH
     instance['MAX_HEIGHT'] = MAX_HEIGHT
-
+    
     result = instance.solve(timeout=timedelta(minutes=5), processes=4)
     
     if time.time() >= timeout:
