@@ -1,4 +1,4 @@
-# Import the necessary libraries
+### Import the necessary libraries
 from tqdm import tqdm
 from utils import import_instances, plot_solution
 import time
@@ -6,12 +6,12 @@ from datetime import timedelta
 from minizinc import Instance, Model, Solver
 gecode = Solver.lookup("gecode")
 
-## Data Input
 
+### Data Input
 instances = import_instances('input/instances/')
 
-## Functions
 
+### Functions
 def get_variables(instances, number):
     # Get the number of circuits
     circuits = []
@@ -107,15 +107,15 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
         circuits.append([circuit_widths[i], circuit_heights[i], start_x[i], start_y[i]])
     return circuits            
 
-# # Show a sample solution
+
+# ### Show a sample solution
 # n = 0
 # CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
 # shapes, valid_shapes = get_shapes(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
 # rect_size, rect_offset, dimensions = get_rectangles(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
 
-# ## MiniZinc Code
-
+# # MiniZinc Code
 # code = f"""
     # include "globals.mzn";
 
@@ -190,17 +190,16 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     
     # circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
     # plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
-    
-## Data Output
 
+    
+### Data Output
 for n in tqdm(range(len(instances))):
     CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
 
     shapes, valid_shapes = get_shapes(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
     rect_size, rect_offset, dimensions = get_rectangles(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
     
-    ## MiniZinc Code
-
+    # MiniZinc Code
     code = f"""
         include "globals.mzn";
 
