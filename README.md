@@ -1,4 +1,4 @@
-# CDMO 1 Project (VLSI Design) 
+# CDMO Project (VLSI Design) 
 
 ## Overview
 The CDMO project involves the solving of a VLSI (Very Large Scale Integration) problem using (i) Constraint Programming (CP), and (ii) propositional SATisfiability (SAT) and/or its extension to Satisfiability Modulo Theories (SMT). VLSI refers to the trend of integrating circuits into silicon chips.
