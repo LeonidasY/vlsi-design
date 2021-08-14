@@ -1,7 +1,6 @@
 ### Import the necessary libraries
 from tqdm import tqdm
 from utils import import_instances, plot_solution, output_solution
-from collections import OrderedDict
 import time
 from datetime import timedelta
 from minizinc import Instance, Model, Solver
@@ -17,27 +16,16 @@ def get_variables(instances, number):
     # Get the number of circuits
     circuits = []
     for n in range(int(instances[number][1])):
-        circuits.append(f'Block {n}')
+        circuits.append(f'Circuit {n}')
     
     # Get circuit lengths and heights
-    width_lst = []
-    height_lst = []
-    area = {}
-    for n, value in enumerate(instances[number][2:]):
-        width, height = value.split(' ')
-        
-        width_lst.append(int(width))
-        height_lst.append(int(height))
-        area[n] = int(width) * int(height)
-    
-    sort_area = OrderedDict(sorted(area.items(), key=lambda t: t[1]))
-    
     circuit_widths = []
     circuit_heights = []
 
-    for i in sort_area.keys():
-        circuit_widths.append(int(width_lst[i]))
-        circuit_heights.append(int(height_lst[i]))
+    for value in instances[number][2:]:
+        width, height = value.split(' ')
+        circuit_widths.append(int(width))
+        circuit_heights.append(int(height))
     
     # Get the maximum width and height
     max_width = int(instances[number][0])
@@ -53,6 +41,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     circuits = []
     for i in range(len(start_x)):
         circuits.append([circuit_widths[i], circuit_heights[i], start_x[i], start_y[i]])
+    
     return circuits
 
 # MiniZinc Code
@@ -80,6 +69,9 @@ code = """
 
     % Constraint to remove overlaps
     constraint diffn(start_x, start_y, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS);
+    
+    % Symmetry breaking
+    constraint lex_lesseq(start_y, reverse(start_y));
 
     % Search strategy
     solve :: seq_search([int_search(start_x, most_constrained, indomain_min), 

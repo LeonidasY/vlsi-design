@@ -16,7 +16,7 @@ def get_variables(instances, number):
     # Get the number of circuits
     circuits = []
     for n in range(int(instances[number][1])):
-        circuits.append(f'Block {n}')
+        circuits.append(f'Circuit {n}')
     
     # Get circuit lengths and heights
     circuit_widths = []
@@ -51,8 +51,10 @@ def get_shapes(circuit_widths, circuit_heights):
             shapes += f"{{{i}}}, {{{i+1}}}, "
             valid_shapes += f"{{{i}, {i+1}}}, "
             i += 2
-    shapes = '[' + shapes[:-1] + ']'
-    valid_shapes = '[' + valid_shapes[:-1] + ']'
+    
+    shapes = '[' + shapes[:-2] + ']'
+    valid_shapes = '[' + valid_shapes[:-2] + ']'
+    
     return shapes, valid_shapes
     
 def get_rectangles(circuit_widths, circuit_heights):
@@ -75,8 +77,10 @@ def get_rectangles(circuit_widths, circuit_heights):
             
             dimensions.append([circuit_widths[n], circuit_heights[n]])
             dimensions.append([circuit_heights[n], circuit_widths[n]])
+    
     rect_size = '[|' + rect_size[:-1] + '|]'
     rect_offset = '[|' + rect_offset[:-1] + '|]' 
+    
     return rect_size, rect_offset, dimensions
     
 def get_solution(dimensions, x, kind):
@@ -84,11 +88,13 @@ def get_solution(dimensions, x, kind):
     heights = []  
     start_x = []
     start_y = []  
+    
     for i, n in enumerate(kind):
         widths.append(dimensions[n-1][0])
         heights.append(dimensions[n-1][1])
         start_x.append(x[i][0])
         start_y.append(x[i][1])
+    
     return widths, heights, start_x, start_y
     
 def output_solution(max_width, max_height, widths, heights, start_x, start_y, file):
@@ -105,6 +111,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     circuits = []
     for i in range(len(start_x)):
         circuits.append([circuit_widths[i], circuit_heights[i], start_x[i], start_y[i]])
+    
     return circuits            
 
 
@@ -145,7 +152,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     # u = [MAX_WIDTH, MAX_HEIGHT];
     
     # array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
-
+    
     # constraint forall(obj in OBJECTS)(
         # kind[obj] in valid_shapes[obj]
     # );
@@ -229,7 +236,7 @@ for n in tqdm(range(len(instances))):
         u = [MAX_WIDTH, MAX_HEIGHT];
         
         array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
-
+        
         constraint forall(obj in OBJECTS)(
             kind[obj] in valid_shapes[obj]
         );
