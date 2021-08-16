@@ -1,6 +1,7 @@
 ### Import the necessary libraries
 from tqdm import tqdm
 from utils import import_instances, plot_solution
+import math
 import time
 from datetime import timedelta
 from minizinc import Instance, Model, Solver
@@ -33,7 +34,7 @@ def get_variables(instances, number):
     total_area = 0
     for n in range(int(instances[number][1])):
         total_area += circuit_widths[n] * circuit_heights[n]
-    max_height = round(total_area / max_width)
+    max_height = math.ceil(total_area / max_width)
     
     return circuits, circuit_widths, circuit_heights, max_width, max_height
 
