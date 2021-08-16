@@ -33,19 +33,19 @@ def get_variables(instance_number):
 
 # Z3 SAT Code
 def vlsi(s, height):
-    grid = [[[Bool(f"v_{i}_{j}_{k}") for k in range(number_of_circuits)] for j in range(width)] for i in range(height)]
+    grid = [[[Bool(f"grid_{i}_{j}_{c}") for c in range(number_of_circuits)] for j in range(width)] for i in range(height)]
 
-    # A cell has only one value (only one circuit can be on each place)
+    # A place has only one value (only one circuit can be on each place)
     for i in range(height):
         for j in range(width):
             s.add(at_most_one(grid[i][j]))
 
     # Every piece of a given circuit must be placed together
-    for n in range(number_of_circuits):
+    for c in range(number_of_circuits):
         circuit_place = []
-        for i in range(height - circuits_height[n] + 1):
-            for j in range(width - circuits_width[n] + 1):
-                circuit_place.append(And([grid[ii][jj][n] for ii in range(i, i + circuits_height[n]) for jj in range(j, j + circuits_width[n])]))
+        for i in range(height - circuits_height[c] + 1):
+            for j in range(width - circuits_width[c] + 1):
+                circuit_place.append(And([grid[ii][jj][c] for ii in range(i, i + circuits_height[c]) for jj in range(j, j + circuits_width[c])]))
         s.add(at_least_one(circuit_place))
     
     sol = []
@@ -54,16 +54,14 @@ def vlsi(s, height):
         for i in range(width):
             sol.append([])
             for j in range(height):
-                for k in range(number_of_circuits):
-                    if m.evaluate(grid[i][j][k]):
-                        sol[i].append(k)
+                for c in range(number_of_circuits):
+                    if m.evaluate(grid[i][j][c]):
+                        sol[i].append(c)
     elif s.reason_unknown() == "timeout":
         print("Solver timeout")
     else:
         print("Failed to solve")
     return sol
-
-
 
 def vlsiOLD(s, height):
     # Variables

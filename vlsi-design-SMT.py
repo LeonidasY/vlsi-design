@@ -26,49 +26,49 @@ def get_variables(instance_number):
 
 def vlsi(s, plate_height):    
     # matrix of the coordinates of the bottom-left corner of each circuit
-    v = [[Int(f"x_{i}_{coordinates}") for coordinates in range(2)] for i in range(number_of_circuits)]
+    corner_coordinates = [[Int(f"c_{i}_{coordinates}") for coordinates in range(2)] for i in range(number_of_circuits)]
 
     # for easier comprension the coordinates of the circuits will be given names
     W = 0   #the x-coordinate (or width)
     H = 1   #the y-coordinate (or height)
 
     # each circuit's bottom-left corner needs to be in the grid and have all the circuit contained in the plate
-    inside = [(And( v[n][W] >= 0,
-                    v[n][W] + circuits_width[n] <= plate_width, 
-                    v[n][H] >= 0,
-                    v[n][H] + circuits_height[n] <= plate_height)) for n in range(number_of_circuits)]
+    inside = [(And( corner_coordinates[n][W] >= 0,
+                    corner_coordinates[n][W] + circuits_width[n] <= plate_width, 
+                    corner_coordinates[n][H] >= 0,
+                    corner_coordinates[n][H] + circuits_height[n] <= plate_height)) for n in range(number_of_circuits)]
 
     # each circuit cannot overlap with another circuit
     overlap = []
     for n in range(number_of_circuits):
         for m in range(n + 1, number_of_circuits):
-            overlap.append((Or( v[m][W] - v[n][W] >= circuits_width[n],
-                                v[n][W] - v[m][W] >= circuits_width[m],
-                                v[m][H] - v[n][H] >= circuits_height[n],
-                                v[n][H] - v[m][H] >= circuits_height[m])))
+            overlap.append((Or( corner_coordinates[m][W] - corner_coordinates[n][W] >= circuits_width[n],
+                                corner_coordinates[n][W] - corner_coordinates[m][W] >= circuits_width[m],
+                                corner_coordinates[m][H] - corner_coordinates[n][H] >= circuits_height[n],
+                                corner_coordinates[n][H] - corner_coordinates[m][H] >= circuits_height[m])))
 
     # the sum of the horizontal/vertical sides of the traversed circuits, can be at most the one of the plate
-    implied = []
-    for i in range(plate_width):
-        implied.append(sum(
-            [If(And(v[j][W] <= i, v[j][W] + circuits_width[j] > i),
-                circuits_height[j],
-                0) for j in range(number_of_circuits)]) 
-                            <= plate_height)
+    #implied = []
+    #for i in range(plate_width):
+    #    implied.append(sum(
+    #        [If(And(corner_coordinates[j][W] <= i, corner_coordinates[j][W] + circuits_width[j] > i),
+    #            circuits_height[j],
+    #            0) for j in range(number_of_circuits)]) 
+    #                        <= plate_height)
+#
+    #for i in range(plate_height):
+    #    implied.append(sum(
+    #        [If(And(corner_coordinates[j][H] <= i, corner_coordinates[j][H] + circuits_height[j] > i), 
+    #            circuits_width[j],
+    #            0) for j in range(number_of_circuits)]) 
+    #                        <= plate_width)
 
-    for i in range(plate_height):
-        implied.append(sum(
-            [If(And(v[j][H] <= i, v[j][H] + circuits_height[j] > i), 
-                circuits_width[j],
-                0) for j in range(number_of_circuits)]) 
-                            <= plate_width)
-
-    vlsi_model = inside + overlap + implied
+    vlsi_model = inside + overlap
     s.add(vlsi_model)
     
     if s.check() == sat:
         m = s.model()
-        return [[int(m.evaluate(v[i][j]).as_string()) for j in range(2)] for i in range(number_of_circuits)]
+        return [[int(m.evaluate(corner_coordinates[i][j]).as_string()) for j in range(2)] for i in range(number_of_circuits)]
     else:
         return 
 
