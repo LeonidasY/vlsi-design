@@ -28,15 +28,15 @@ def get_variables(instances, number):
         circuit_widths.append(int(width))
         circuit_heights.append(int(height))
     
-    # Get the maximum width and height
+    # Get the maximum width and minimum height
     max_width = int(instances[number][0])
     
     total_area = 0
     for n in range(int(instances[number][1])):
         total_area += circuit_widths[n] * circuit_heights[n]
-    max_height = math.ceil(total_area / max_width)
+    min_height = math.ceil(total_area / max_width)
     
-    return circuits, circuit_widths, circuit_heights, max_width, max_height
+    return circuits, circuit_widths, circuit_heights, max_width, min_height
 
 def get_shapes(circuit_widths, circuit_heights):
     shapes = ''
@@ -98,8 +98,8 @@ def get_solution(dimensions, x, kind):
     
     return widths, heights, start_x, start_y
     
-def output_solution(max_width, max_height, widths, heights, start_x, start_y, file):
-    solution = [str(max_width), str(max_height)]
+def output_solution(max_width, min_height, widths, heights, start_x, start_y, file):
+    solution = [str(max_width), str(min_height)]
     for i in range(len(widths)):
         solution.append(str(widths[i]) + ' ' + str(heights[i]) + ' ' + str(start_x[i]) + ' ' + str(start_y[i]))
     
@@ -108,7 +108,7 @@ def output_solution(max_width, max_height, widths, heights, start_x, start_y, fi
             output.write(item)
             output.write('\n')  
 
-def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x, start_y):
+def get_circuits(circuit_widths, circuit_heights, max_width, min_height, start_x, start_y):
     circuits = []
     for i in range(len(start_x)):
         circuits.append([circuit_widths[i], circuit_heights[i], start_x[i], start_y[i]])
@@ -118,7 +118,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
 
 # ### Show a sample solution
 # n = 0
-# CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+# CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
 
 # shapes, valid_shapes = get_shapes(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
 # rect_size, rect_offset, dimensions = get_rectangles(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
@@ -134,7 +134,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     # int: nShapes;
    
     # int: MAX_WIDTH;
-    # int: MAX_HEIGHT;
+    # int: MIN_HEIGHT;
 
     # set of int: DIMENSIONS = 1..k;
     # set of int: OBJECTS    = 1..nObjects;
@@ -150,7 +150,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     # array[OBJECTS] of var SHAPES:         kind;
 
     # l = [0, 0];
-    # u = [MAX_WIDTH, MAX_HEIGHT];
+    # u = [MAX_WIDTH, MIN_HEIGHT];
     
     # array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
     
@@ -184,7 +184,7 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
 # instance['nRectangles'] = len(dimensions)
 # instance['nShapes'] = len(dimensions)
 # instance['MAX_WIDTH'] = MAX_WIDTH
-# instance['MAX_HEIGHT'] = MAX_HEIGHT
+# instance['MIN_HEIGHT'] = MIN_HEIGHT
 
 # result = instance.solve(timeout=timedelta(minutes=5), processes=4)
 
@@ -196,13 +196,13 @@ def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x
     
     # circuit_widths, circuit_heights, start_x, start_y = get_solution(dimensions, x, kind)
     
-    # circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-    # plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
+    # circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MIN_HEIGHT, start_x, start_y)
+    # plot_solution(MAX_WIDTH, MIN_HEIGHT, circuits)
 
     
 ### Data Output
 for n in tqdm(range(len(instances))):
-    CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+    CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
 
     shapes, valid_shapes = get_shapes(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
     rect_size, rect_offset, dimensions = get_rectangles(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
@@ -218,7 +218,7 @@ for n in tqdm(range(len(instances))):
         int: nShapes;
        
         int: MAX_WIDTH;
-        int: MAX_HEIGHT;
+        int: MIN_HEIGHT;
 
         set of int: DIMENSIONS = 1..k;
         set of int: OBJECTS    = 1..nObjects;
@@ -234,7 +234,7 @@ for n in tqdm(range(len(instances))):
         array[OBJECTS] of var SHAPES:         kind;
 
         l = [0, 0];
-        u = [MAX_WIDTH, MAX_HEIGHT];
+        u = [MAX_WIDTH, MIN_HEIGHT];
         
         array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
         
@@ -268,7 +268,7 @@ for n in tqdm(range(len(instances))):
     instance['nRectangles'] = len(dimensions)
     instance['nShapes'] = len(dimensions)
     instance['MAX_WIDTH'] = MAX_WIDTH
-    instance['MAX_HEIGHT'] = MAX_HEIGHT
+    instance['MIN_HEIGHT'] = MIN_HEIGHT
     
     result = instance.solve(timeout=timedelta(minutes=5), processes=4)
     
@@ -279,7 +279,7 @@ for n in tqdm(range(len(instances))):
         kind = result['kind']
         
         circuit_widths, circuit_heights, start_x, start_y = get_solution(dimensions, x, kind)
-        output_solution(MAX_WIDTH, MAX_HEIGHT, circuit_widths, circuit_heights, start_x, start_y, f'output/CP (Rotation)/solutions/out-{n+1}.txt')
+        output_solution(MAX_WIDTH, MIN_HEIGHT, circuit_widths, circuit_heights, start_x, start_y, f'output/CP (Rotation)/solutions/out-{n+1}.txt')
         
-        circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-        plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits, f'output/CP (Rotation)/images/out-{n+1}.png')
+        circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MIN_HEIGHT, start_x, start_y)
+        plot_solution(MAX_WIDTH, MIN_HEIGHT, circuits, f'output/CP (Rotation)/images/out-{n+1}.png')

@@ -28,17 +28,17 @@ def get_variables(instances, number):
         circuit_widths.append(int(width))
         circuit_heights.append(int(height))
     
-    # Get the maximum width and height
+    # Get the maximum width and minimum height
     max_width = int(instances[number][0])
     
     total_area = 0
     for n in range(int(instances[number][1])):
         total_area += circuit_widths[n] * circuit_heights[n]
-    max_height = math.ceil(total_area / max_width)
+    min_height = math.ceil(total_area / max_width)
     
-    return circuits, circuit_widths, circuit_heights, max_width, max_height
+    return circuits, circuit_widths, circuit_heights, max_width, min_height
 
-def get_circuits(circuit_widths, circuit_heights, max_width, max_height, start_x, start_y):
+def get_circuits(circuit_widths, circuit_heights, max_width, min_height, start_x, start_y):
     circuits = []
     for i in range(len(start_x)):
         circuits.append([circuit_widths[i], circuit_heights[i], start_x[i], start_y[i]])
@@ -55,18 +55,18 @@ code = """
     array[CIRCUITS] of int: CIRCUIT_HEIGHTS;
 
     int: MAX_WIDTH;
-    int: MAX_HEIGHT;
+    int: MIN_HEIGHT;
 
     array[CIRCUITS] of var 0..MAX_WIDTH: start_x;
-    array[CIRCUITS] of var 0..MAX_HEIGHT: start_y;
+    array[CIRCUITS] of var 0..MIN_HEIGHT: start_y;
 
     % Constraints to find x-coordinates
-    constraint cumulative(start_x, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_HEIGHT);
+    constraint cumulative(start_x, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MIN_HEIGHT);
     constraint forall(c in CIRCUITS)(start_x[c] + CIRCUIT_WIDTHS[c] <= MAX_WIDTH);
 
     % Constraints to find y-coordinates
     constraint cumulative(start_y, CIRCUIT_HEIGHTS, CIRCUIT_WIDTHS, MAX_WIDTH);
-    constraint forall(c in CIRCUITS)(start_y[c] + CIRCUIT_HEIGHTS[c] <= MAX_HEIGHT);
+    constraint forall(c in CIRCUITS)(start_y[c] + CIRCUIT_HEIGHTS[c] <= MIN_HEIGHT);
 
     % Constraint to remove overlaps
     constraint diffn(start_x, start_y, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS);
@@ -83,7 +83,7 @@ code = """
 
 # ### Show a sample solution
 # n = 0
-# CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+# CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
 
 # trivial = Model()
 # trivial.add_string(code)
@@ -96,7 +96,7 @@ code = """
 # instance['CIRCUIT_WIDTHS'] = CIRCUIT_WIDTHS
 # instance['CIRCUIT_HEIGHTS'] = CIRCUIT_HEIGHTS
 # instance['MAX_WIDTH'] = MAX_WIDTH
-# instance['MAX_HEIGHT'] = MAX_HEIGHT
+# instance['MIN_HEIGHT'] = MIN_HEIGHT
 
 # result = instance.solve(timeout=timedelta(minutes=5), processes=4)
 
@@ -106,13 +106,13 @@ code = """
     # start_x = result['start_x']
     # start_y = result['start_y']
     
-    # circuits = get_circuits(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-    # plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits)
+    # circuits = get_circuits(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT, start_x, start_y)
+    # plot_solution(MAX_WIDTH, MIN_HEIGHT, circuits)
 
 
 ### Data Output
 for n in tqdm(range(len(instances))):
-    CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT = get_variables(instances, n)
+    CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
     
     trivial = Model()
     trivial.add_string(code)
@@ -125,7 +125,7 @@ for n in tqdm(range(len(instances))):
     instance['CIRCUIT_WIDTHS'] = CIRCUIT_WIDTHS
     instance['CIRCUIT_HEIGHTS'] = CIRCUIT_HEIGHTS
     instance['MAX_WIDTH'] = MAX_WIDTH
-    instance['MAX_HEIGHT'] = MAX_HEIGHT
+    instance['MIN_HEIGHT'] = MIN_HEIGHT
     
     result = instance.solve(timeout=timedelta(minutes=5), processes=4)
     
@@ -135,7 +135,7 @@ for n in tqdm(range(len(instances))):
         start_x = result['start_x']
         start_y = result['start_y']
         
-        output_solution(instances[n], MAX_HEIGHT, start_x, start_y, f'output/CP (Normal)/solutions/out-{n+1}.txt')
+        output_solution(instances[n], MIN_HEIGHT, start_x, start_y, f'output/CP (Normal)/solutions/out-{n+1}.txt')
         
-        circuits = get_circuits(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MAX_HEIGHT, start_x, start_y)
-        plot_solution(MAX_WIDTH, MAX_HEIGHT, circuits, f'output/CP (Normal)/images/out-{n+1}.png')
+        circuits = get_circuits(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT, start_x, start_y)
+        plot_solution(MAX_WIDTH, MIN_HEIGHT, circuits, f'output/CP (Normal)/images/out-{n+1}.png')
