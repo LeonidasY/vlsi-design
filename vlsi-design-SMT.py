@@ -28,20 +28,20 @@ def get_variables(instance_number):
 
 ### Z3 SMT Code
 def vlsi(s, plate_height):    
-    # matrix of the coordinates of the bottom-left corner of each circuit
+    # Matrix of the coordinates of the bottom-left corner of each circuit
     corner_coordinates = [[Int(f"c_{i}_{coordinates}") for coordinates in range(2)] for i in range(number_of_circuits)]
 
-    # for easier comprension the coordinates of the circuits will be given names
+    # For easier comprension the coordinates of the circuits will be given names
     W = 0   #the x-coordinate (or width)
     H = 1   #the y-coordinate (or height)
 
-    # each circuit's bottom-left corner needs to be in the grid and have all the circuit contained in the plate
+    # Each circuit's bottom-left corner needs to be in the grid and have all the circuit contained in the plate
     inside = [(And( corner_coordinates[n][W] >= 0,
                     corner_coordinates[n][W] + circuits_width[n] <= plate_width, 
                     corner_coordinates[n][H] >= 0,
                     corner_coordinates[n][H] + circuits_height[n] <= plate_height)) for n in range(number_of_circuits)]
 
-    # each circuit cannot overlap with another circuit
+    # Each circuit cannot overlap with another circuit
     overlap = []
     for n in range(number_of_circuits):
         for m in range(n + 1, number_of_circuits):
@@ -53,6 +53,7 @@ def vlsi(s, plate_height):
     vlsi_model = inside + overlap
     s.add(vlsi_model)
     
+    # Return solution if possible
     if s.check() == sat:
         m = s.model()
         return [[int(m.evaluate(corner_coordinates[i][j]).as_string()) for j in range(2)] for i in range(number_of_circuits)]
@@ -64,12 +65,13 @@ for instance_number in tqdm(range(len(instances))):
     
     s = Solver()
 
-    #5 minutes (300 sec) limit for each instance to be solved
+    #5 minutes (300 sec) time limit for each instance to be solved
     times = 300 * 1000
     s.set(timeout = times)
 
     sol = vlsi(s, starting_height)
         
+    # Save solution if present
     if (sol) :
         start_x = []
         start_y = []
@@ -80,4 +82,4 @@ for instance_number in tqdm(range(len(instances))):
         plot_solution(plate_width, starting_height, circuits, f'output/SMT/images/out-{instance_number + 1}.png')
         output_solution(instances[instance_number], starting_height, start_x, start_y, f'output/SMT/solutions/out-{instance_number + 1}.txt')
     else:
-        print("\nFailed to solve instance %i" %(instance_number + 1))
+        print("\nFailed to solve instance %i" % (instance_number + 1))

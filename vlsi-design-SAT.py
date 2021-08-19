@@ -47,12 +47,13 @@ def vlsi(s, height):
 
     # Every piece of a given circuit must be placed together
     for c in range(number_of_circuits):
-        circuit_place = []
+        positions = []
         for i in range(width - circuits_width[c] + 1):
             for j in range(height - circuits_height[c] + 1):
-                circuit_place.append(And([grid[ii][jj][c] for ii in range(i, i + circuits_width[c]) for jj in range(j, j + circuits_height[c])]))
-        s.add(at_least_one(circuit_place))
+                positions.append(And([grid[ii][jj][c] for ii in range(i, i + circuits_width[c]) for jj in range(j, j + circuits_height[c])]))
+        s.add(at_least_one(positions))
     
+    # Return solution if possible
     sol = []
     if s.check() == sat:
         m = s.model()
@@ -69,12 +70,13 @@ for instance_number in tqdm(range(len(instances))):
 
     s = Solver()
 
-    #5 minutes (300 sec) limit for each instance to be solved
+    #5 minutes (300 sec) time limit for each instance to be solved
     times = 300 * 1000
     s.set(timeout=times)
 
     sol = vlsi(s, starting_height)
-        
+    
+    # Save solution if present
     if (sol) :
         start_x, flag, start_y= [False]*(number_of_circuits), [False]*(number_of_circuits), [False]*(number_of_circuits)
         for i in range(len(sol)):
@@ -85,7 +87,7 @@ for instance_number in tqdm(range(len(instances))):
                         start_x[c] = i
                         start_y[c] = j
         circuits = [[circuits_width[i], circuits_height[i], start_x[i], start_y[i]] for i in range(number_of_circuits)]
-        plot_solution(width, starting_height, circuits, f'output/SAT/images/out-{instance_number+1}.png')
+        plot_solution(width, starting_height, circuits, f'output/SAT/images/out - {instance_number + 1}.png')
         output_solution(instances[instance_number], starting_height, start_x, start_y, f'output/SAT/solutions/out-{instance_number + 1}.txt')
     else:
-        print("\nFailed to solve instance %i" %(instance_number + 1))
+        print("\nFailed to solve instance %i" % (instance_number + 1))
