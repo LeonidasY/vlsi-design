@@ -3,7 +3,7 @@
 ## Overview
 The CDMO project involves the solving of a VLSI (Very Large Scale Integration) problem using (i) Constraint Programming (CP), and (ii) propositional SATisfiability (SAT) and/or its extension to Satisfiability Modulo Theories (SMT). VLSI refers to the trend of integrating circuits into silicon chips.
 
-A report was written and submitted as part of the project and may be viewed [here]().
+A report was written and submitted as part of the project and may be viewed [here](https://github.com/LeonidasY/vlsi-design/blob/main/Project%20Report.pdf).
 
 ### Dataset
 The dataset consist of 40 VLSI instances, where each instance is a text file containing the following:
