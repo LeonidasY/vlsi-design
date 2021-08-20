@@ -32,7 +32,7 @@ def get_variables(instance_number):
         circuits_height.append(int(height))  
 
     width = int(instances[instance_number][0])
-    starting_height = max(max(circuits_height),int(math.ceil(sum([circuits_width[c] * circuits_height[c] for c in range(number_of_circuits)]) / width)))
+    starting_height = int(math.ceil(sum([circuits_width[c] * circuits_height[c] for c in range(number_of_circuits)]) / width))
     
     return number_of_circuits, circuits_width, circuits_height, width, starting_height
 
