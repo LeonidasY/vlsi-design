@@ -47,35 +47,6 @@ code = """
 """
 
 
-# ### Show a sample solution
-# n = 0
-# CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
-
-# trivial = Model()
-# trivial.add_string(code)
-
-# timeout = time.time() + 60*5
-
-# instance = Instance(gecode, trivial)
-
-# instance['CIRCUITS'] = CIRCUITS
-# instance['CIRCUIT_WIDTHS'] = CIRCUIT_WIDTHS
-# instance['CIRCUIT_HEIGHTS'] = CIRCUIT_HEIGHTS
-# instance['MAX_WIDTH'] = MAX_WIDTH
-# instance['MIN_HEIGHT'] = MIN_HEIGHT
-
-# result = instance.solve(timeout=timedelta(minutes=5), processes=4)
-
-# if time.time() >= timeout:
-    # print(f'Instance-{n} Fail: Timeout')
-# else:
-    # start_x = result['start_x']
-    # start_y = result['start_y']
-    
-    # circuits = get_circuits(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT, start_x, start_y)
-    # plot_solution(MAX_WIDTH, MIN_HEIGHT, circuits)
-
-
 ### Data Output
 for n in tqdm(range(len(instances))):
     CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
