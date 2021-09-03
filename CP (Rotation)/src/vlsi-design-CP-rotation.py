@@ -12,13 +12,64 @@ instances = import_instances('../../input/')
 
    
 ### Data Output
-for n in tqdm(range(len(instances))):
-    CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
+for n in tqdm(range(len(instances))):   
+    # MiniZinc Code for Model 1
+    code = """
+        include "globals.mzn";
 
-    shapes, valid_shapes = get_shapes(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
-    rect_size, rect_offset, dimensions = get_rectangles(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS)
+        % Variables initialisation
+        enum circuits;
+        array[circuits] of int: circuit_heights;
+        array[circuits] of int: circuit_widths;
+
+        int: max_height;
+        int: min_height;
+        int: max_width;
+
+        var min_height..max_height: height;
+        
+        array[circuits] of var 0..max_height: start_y;
+
+        % Constraints to find y-coordinates
+        constraint cumulative(start_y, circuit_heights, circuit_widths, max_width);
+        constraint forall(c in circuits)(start_y[c] + circuit_heights[c] <= height);
+
+        % Search strategy
+        solve :: seq_search([
+            int_search([height], dom_w_deg, indomain_min),
+            int_search(start_y, dom_w_deg, indomain_min),
+        ])
+        minimize height;
+    """    
+  
+    circuits, circuit_widths, circuit_heights, max_width, max_height, min_height = get_variables(instances, n)
+
+    shapes, valid_shapes = get_shapes(circuit_widths, circuit_heights)
+    rect_size, rect_offset, dimensions = get_rectangles(circuit_widths, circuit_heights)
     
-    # MiniZinc Code
+    trivial = Model()
+    trivial.add_string(code)
+
+    timeout = time.time() + 60*5
+
+    instance = Instance(gecode, trivial)
+
+    instance['circuits'] = circuits
+    instance['circuit_widths'] = circuit_widths
+    instance['circuit_heights'] = circuit_heights
+    instance['max_width'] = max_width
+    instance['max_height'] = max_height
+    instance['min_height'] = min_height
+    
+    try:
+        height = instance.solve(timeout=timedelta(minutes=5), processes=4)['height']
+        time_diff = timeout - time.time()
+    except:
+        print(f'Instance-{n+1} Fail: Timeout')
+        continue        
+    
+    
+    # MiniZinc Code for Model 2
     code = f"""
         include "globals.mzn";
 
@@ -28,60 +79,61 @@ for n in tqdm(range(len(instances))):
         int: nRectangles;
         int: nShapes;
        
-        int: MAX_WIDTH;
-        int: MIN_HEIGHT;
+        int: max_width;
+        int: height;
 
-        set of int: DIMENSIONS = 1..k;
-        set of int: OBJECTS    = 1..nObjects;
-        set of int: RECTANGLES = 1..nRectangles;
-        set of int: SHAPES     = 1..nShapes;
+        set of int: dimensions = 1..k;
+        set of int: objects    = 1..nObjects;
+        set of int: rectangles = 1..nRectangles;
+        set of int: shapes     = 1..nShapes;
 
-        array[DIMENSIONS] of int:             l;
-        array[DIMENSIONS] of int:             u;
-        array[RECTANGLES,DIMENSIONS] of int:  rect_size = {rect_size};
-        array[RECTANGLES,DIMENSIONS] of int:  rect_offset = {rect_offset};
-        array[SHAPES] of set of RECTANGLES:   shapes = {shapes};
-        array[OBJECTS,DIMENSIONS] of var int: x;
-        array[OBJECTS] of var SHAPES:         kind;
+        array[dimensions] of int:             l;
+        array[dimensions] of int:             u;
+        array[rectangles,dimensions] of int:  rect_size = {rect_size};
+        array[rectangles,dimensions] of int:  rect_offset = {rect_offset};
+        array[shapes] of set of rectangles:   rect_shapes = {shapes};
+        array[objects,dimensions] of var int: x;
+        array[objects] of var shapes:         kind;
 
         l = [0, 0];
-        u = [MAX_WIDTH, MIN_HEIGHT];
+        u = [max_width, height];
         
-        array[OBJECTS] of set of SHAPES: valid_shapes = {valid_shapes};
+        array[objects] of set of shapes: valid_shapes = {valid_shapes};
         
-        constraint forall(obj in OBJECTS)(
+        % Constraint to accept only valid shapes
+        constraint forall(obj in objects)(
             kind[obj] in valid_shapes[obj]
         );
         
+        % Constraint for packing
         constraint geost_smallest_bb(
             k,
             rect_size,
             rect_offset,
-            shapes,
+            rect_shapes,
             x,
             kind,
             l,
             u
         );
-
-        solve :: int_search(kind, most_constrained, indomain_min) satisfy;
-    """    
+        
+        % Search strategy
+        solve :: int_search(kind, dom_w_deg, indomain_min) satisfy;
+    """  
     
     trivial = Model()
     trivial.add_string(code)
-    
-    timeout = time.time() + 60*5
 
     instance = Instance(gecode, trivial)
 
     instance['k'] = 2
-    instance['nObjects'] = len(CIRCUITS)
+    instance['nObjects'] = len(circuits)
     instance['nRectangles'] = len(dimensions)
     instance['nShapes'] = len(dimensions)
-    instance['MAX_WIDTH'] = MAX_WIDTH
-    instance['MIN_HEIGHT'] = MIN_HEIGHT
+    instance['max_width'] = max_width
+    instance['height'] = height
     
-    result = instance.solve(timeout=timedelta(minutes=5), processes=4)
+    result = instance.solve(timeout=timedelta(time_diff), processes=4)
     
     if time.time() >= timeout:
         print(f'Instance-{n+1} Fail: Timeout')
@@ -90,7 +142,7 @@ for n in tqdm(range(len(instances))):
         kind = result['kind']
         
         circuit_widths, circuit_heights, start_x, start_y = get_solution(dimensions, x, kind)
-        output_solution(MAX_WIDTH, MIN_HEIGHT, circuit_widths, circuit_heights, start_x, start_y, f'../out/out-{n+1}.txt')
+        output_solution(max_width, min_height, circuit_widths, circuit_heights, start_x, start_y, f'../out/solutions/out-{n+1}.txt')
         
-        circuits = get_circuits(circuit_widths, circuit_heights, MAX_WIDTH, MIN_HEIGHT, start_x, start_y)
-        plot_solution(MAX_WIDTH, MIN_HEIGHT, circuits, f'../out/images/out-{n+1}.png')
+        circuits = get_circuits(circuit_widths, circuit_heights, max_width, min_height, start_x, start_y)
+        plot_solution(max_width, min_height, circuits, f'../out/images/out-{n+1}.png')

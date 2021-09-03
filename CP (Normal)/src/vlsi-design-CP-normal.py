@@ -16,40 +16,43 @@ code = """
     include "globals.mzn";
 
     % Variables initialisation
-    enum CIRCUITS;
-    array[CIRCUITS] of int: CIRCUIT_WIDTHS;
-    array[CIRCUITS] of int: CIRCUIT_HEIGHTS;
+    enum circuits;
+    array[circuits] of int: circuit_heights;
+    array[circuits] of int: circuit_widths;
 
-    int: MAX_WIDTH;
-    int: MIN_HEIGHT;
+    int: max_height;
+    int: min_height;
+    int: max_width;
 
-    array[CIRCUITS] of var 0..MAX_WIDTH: start_x;
-    array[CIRCUITS] of var 0..MIN_HEIGHT: start_y;
-
-    % Constraints to find x-coordinates
-    constraint cumulative(start_x, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MIN_HEIGHT);
-    constraint forall(c in CIRCUITS)(start_x[c] + CIRCUIT_WIDTHS[c] <= MAX_WIDTH);
+    var min_height..max_height: height;
+    
+    array[circuits] of var 0..max_height: start_y;
+    array[circuits] of var 0..max_width: start_x;
 
     % Constraints to find y-coordinates
-    constraint cumulative(start_y, CIRCUIT_HEIGHTS, CIRCUIT_WIDTHS, MAX_WIDTH);
-    constraint forall(c in CIRCUITS)(start_y[c] + CIRCUIT_HEIGHTS[c] <= MIN_HEIGHT);
+    constraint cumulative(start_y, circuit_heights, circuit_widths, max_width);
+    constraint forall(c in circuits)(start_y[c] + circuit_heights[c] <= height);
 
-    % Constraint to remove overlaps
-    constraint diffn(start_x, start_y, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS);
+    % Constraints to find x-coordinates
+    constraint cumulative(start_x, circuit_widths, circuit_heights, height);
+    constraint forall(c in circuits)(start_x[c] + circuit_widths[c] <= max_width);
     
-    % Symmetry breaking
-    constraint lex_lesseq(start_y, reverse(start_y));
+    % Constraint to remove overlaps
+    constraint diffn(start_x, start_y, circuit_widths, circuit_heights);
 
     % Search strategy
-    solve :: seq_search([int_search(start_x, most_constrained, indomain_min), 
-                         int_search(start_y, most_constrained, indomain_min)])
-    satisfy;
+    solve :: seq_search([
+        int_search([height], dom_w_deg, indomain_min),
+        int_search(start_y, dom_w_deg, indomain_min), 
+        int_search(start_x, dom_w_deg, indomain_min),
+    ])
+    minimize height;
 """
 
 
 ### Data Output
 for n in tqdm(range(len(instances))):
-    CIRCUITS, CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT = get_variables(instances, n)
+    circuits, circuit_widths, circuit_heights, max_width, max_height, min_height = get_variables(instances, n)
     
     trivial = Model()
     trivial.add_string(code)
@@ -58,11 +61,12 @@ for n in tqdm(range(len(instances))):
 
     instance = Instance(gecode, trivial)
 
-    instance['CIRCUITS'] = CIRCUITS
-    instance['CIRCUIT_WIDTHS'] = CIRCUIT_WIDTHS
-    instance['CIRCUIT_HEIGHTS'] = CIRCUIT_HEIGHTS
-    instance['MAX_WIDTH'] = MAX_WIDTH
-    instance['MIN_HEIGHT'] = MIN_HEIGHT
+    instance['circuits'] = circuits
+    instance['circuit_widths'] = circuit_widths
+    instance['circuit_heights'] = circuit_heights
+    instance['max_width'] = max_width
+    instance['max_height'] = max_height
+    instance['min_height'] = min_height
     
     result = instance.solve(timeout=timedelta(minutes=5), processes=4)
     
@@ -71,8 +75,9 @@ for n in tqdm(range(len(instances))):
     else:
         start_x = result['start_x']
         start_y = result['start_y']
+        height = result['height']
         
-        output_solution(instances[n], MIN_HEIGHT, start_x, start_y, f'../out/out-{n+1}.txt')
+        output_solution(instances[n], min_height, start_x, start_y, f'../out/solutions/out-{n+1}.txt')
         
-        circuits = get_circuits(CIRCUIT_WIDTHS, CIRCUIT_HEIGHTS, MAX_WIDTH, MIN_HEIGHT, start_x, start_y)
-        plot_solution(MAX_WIDTH, MIN_HEIGHT, circuits, f'../out/images/out-{n+1}.png')
+        circuits = get_circuits(circuit_widths, circuit_heights, max_width, min_height, start_x, start_y)
+        plot_solution(max_width, height, circuits, f'../out/images/out-{n+1}.png')

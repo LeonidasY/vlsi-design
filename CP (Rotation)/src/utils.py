@@ -38,15 +38,16 @@ def get_variables(instances, number):
         circuit_widths.append(int(width))
         circuit_heights.append(int(height))
     
-    # Get the maximum width and minimum height
+    # Get the maximum width, maximum height and minimum height
     max_width = int(instances[number][0])
     
     total_area = 0
     for n in range(int(instances[number][1])):
         total_area += circuit_widths[n] * circuit_heights[n]
+    max_height = sum(circuit_heights)
     min_height = math.ceil(total_area / max_width)
     
-    return circuits, circuit_widths, circuit_heights, max_width, min_height
+    return circuits, circuit_widths, circuit_heights, max_width, max_height, min_height
 
 def get_shapes(circuit_widths, circuit_heights):
     shapes = ''

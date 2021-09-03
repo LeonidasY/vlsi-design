@@ -80,6 +80,6 @@ for instance_number in tqdm(range(len(instances))):
             start_y.append(int(sol[j][1]))
         circuits = [[circuits_width[i], circuits_height[i], start_x[i], start_y[i]] for i in range(number_of_circuits)]
         plot_solution(plate_width, starting_height, circuits, f'../out/images/out-{instance_number + 1}.png')
-        output_solution(instances[instance_number], starting_height, start_x, start_y, f'../out/out-{instance_number + 1}.txt')
+        output_solution(instances[instance_number], starting_height, start_x, start_y, f'../out/solutions/out-{instance_number + 1}.txt')
     else:
         print("\nFailed to solve instance %i" % (instance_number + 1))
