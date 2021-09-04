@@ -133,7 +133,7 @@ for n in tqdm(range(len(instances))):
     instance['max_width'] = max_width
     instance['height'] = height
     
-    result = instance.solve(timeout=timedelta(time_diff), processes=4)
+    result = instance.solve(timeout=timedelta(seconds=round(time_diff)), processes=4)
     
     if time.time() >= timeout:
         print(f'Instance-{n+1} Fail: Timeout')
