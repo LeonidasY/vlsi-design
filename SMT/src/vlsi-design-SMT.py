@@ -22,9 +22,10 @@ def get_variables(instance_number):
         circuits_height.append(int(height))  
 
     width = int(instances[instance_number][0])
-    starting_height = int(math.ceil(sum([circuits_width[c] * circuits_height[c] for c in range(number_of_circuits)]) / width))
+    min_height = int(math.ceil(sum([circuits_width[c] * circuits_height[c] for c in range(number_of_circuits)]) / width))
+    max_height = sum(circuits_height)
     
-    return number_of_circuits, circuits_width, circuits_height, width, starting_height
+    return number_of_circuits, circuits_width, circuits_height, width, min_height, max_height
 
 ### Z3 SMT Code
 def vlsi(s, plate_height):    
@@ -56,12 +57,13 @@ def vlsi(s, plate_height):
     # Return solution if possible
     if s.check() == sat:
         m = s.model()
+        print([[int(m.evaluate(corner_coordinates[i][j]).as_string()) for j in range(2)] for i in range(number_of_circuits)])
         return [[int(m.evaluate(corner_coordinates[i][j]).as_string()) for j in range(2)] for i in range(number_of_circuits)]
     else:
         return 
 
 for instance_number in tqdm(range(len(instances))):
-    number_of_circuits, circuits_width, circuits_height, plate_width, starting_height = get_variables(instance_number)
+    number_of_circuits, circuits_width, circuits_height, plate_width, min_height, max_height = get_variables(instance_number)
     
     s = Solver()
 
@@ -69,7 +71,7 @@ for instance_number in tqdm(range(len(instances))):
     times = 300 * 1000
     s.set(timeout = times)
 
-    sol = vlsi(s, starting_height)
+    sol = vlsi(s, min_height)
         
     # Save solution if present
     if (sol) :
@@ -79,7 +81,7 @@ for instance_number in tqdm(range(len(instances))):
             start_x.append(int(sol[j][0]))
             start_y.append(int(sol[j][1]))
         circuits = [[circuits_width[i], circuits_height[i], start_x[i], start_y[i]] for i in range(number_of_circuits)]
-        plot_solution(plate_width, starting_height, circuits, f'../out/images/out-{instance_number + 1}.png')
-        output_solution(instances[instance_number], starting_height, start_x, start_y, f'../out/solutions/out-{instance_number + 1}.txt')
+        plot_solution(plate_width, min_height, circuits, f'../out/images/out-{instance_number + 1}.png')
+        output_solution(instances[instance_number], min_height, start_x, start_y, f'../out/solutions/out-{instance_number + 1}.txt')
     else:
         print("\nFailed to solve instance %i" % (instance_number + 1))
