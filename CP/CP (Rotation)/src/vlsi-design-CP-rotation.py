@@ -133,16 +133,20 @@ for n in tqdm(range(len(instances))):
     instance['max_width'] = max_width
     instance['height'] = height
     
-    result = instance.solve(timeout=timedelta(seconds=round(time_diff)), processes=4)
-    
-    if time.time() >= timeout:
+    try:
+        result = instance.solve(timeout=timedelta(seconds=round(time_diff)), processes=4)
+        
+        if time.time() >= timeout:
+            print(f'Instance-{n+1} Fail: Timeout')
+        else:
+            x = result['x']
+            kind = result['kind']
+            
+            circuit_widths, circuit_heights, start_x, start_y = get_solution(dimensions, x, kind)
+            output_solution(max_width, min_height, circuit_widths, circuit_heights, start_x, start_y, f'../out/solutions/out-{n+1}.txt')
+            
+            circuits = get_circuits(circuit_widths, circuit_heights, max_width, min_height, start_x, start_y)
+            plot_solution(max_width, min_height, circuits, f'../out/images/out-{n+1}.png')
+    except:
         print(f'Instance-{n+1} Fail: Timeout')
-    else:
-        x = result['x']
-        kind = result['kind']
-        
-        circuit_widths, circuit_heights, start_x, start_y = get_solution(dimensions, x, kind)
-        output_solution(max_width, min_height, circuit_widths, circuit_heights, start_x, start_y, f'../out/solutions/out-{n+1}.txt')
-        
-        circuits = get_circuits(circuit_widths, circuit_heights, max_width, min_height, start_x, start_y)
-        plot_solution(max_width, min_height, circuits, f'../out/images/out-{n+1}.png')
+        continue      
