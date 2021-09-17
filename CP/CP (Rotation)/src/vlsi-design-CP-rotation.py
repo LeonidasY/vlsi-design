@@ -8,7 +8,7 @@ gecode = Solver.lookup("gecode")
 
 
 ### Data Input
-instances = import_instances('../../input/')
+instances = import_instances('../../../input/')
 
    
 ### Data Output
