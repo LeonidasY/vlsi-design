@@ -13,8 +13,8 @@ The dataset consist of 40 VLSI instances, where each instance is a text file con
 The images below show the visualisations of different solved instances using either CP, SAT or SMT.
 
 <p float="left">
-  <img src="https://github.com/LeonidasY/vlsi-design/blob/main/CP (Normal)/out/images/out-5.png" width="300" />
-  <img src="https://github.com/LeonidasY/vlsi-design/blob/main/CP (Rotation)/out/images/out-10.png" width="300" /> 
+  <img src="https://github.com/LeonidasY/vlsi-design/blob/main/CP/CP (Normal)/out/images/out-5.png" width="300" />
+  <img src="https://github.com/LeonidasY/vlsi-design/blob/main/CP/CP (Rotation)/out/images/out-10.png" width="300" /> 
   <img src="https://github.com/LeonidasY/vlsi-design/blob/main/SAT/out/images/out-15.png" width="300" /> 
   <img src="https://github.com/LeonidasY/vlsi-design/blob/main/SMT/out/images/out-30.png" width="300" />
 </p>
