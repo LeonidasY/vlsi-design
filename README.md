@@ -9,6 +9,12 @@ The dataset consist of 40 VLSI instances, where each instance is a text file con
 - The following line gives n, which is the number of necessary circuits to place inside the plate. 
 - Then n lines follow, each with x<sub>i</sub> and y<sub>i</sub> , representing the horizontal and vertical dimensions of the i-th circuit.
 
+## Methodologies
+The steps taken for each method are described in a series of reports as follows:
+- [CP Report](https://github.com/LeonidasY/vlsi-design/blob/main/CP/CP.pdf)
+- [SAT Report](https://github.com/LeonidasY/vlsi-design/blob/main/SAT/SAT.pdf)
+- [SMT Report](https://github.com/LeonidasY/vlsi-design/blob/main/SMT/SMT.pdf)
+
 ## Results
 The images below show the visualisations of different solved instances using either CP, SAT or SMT.
 
