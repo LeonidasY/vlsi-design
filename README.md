@@ -11,9 +11,9 @@ The dataset consist of 40 VLSI instances, where each instance is a text file con
 
 ## Methodologies
 The steps taken for each method are described in a series of reports as follows:
-- [CP Report](https://github.com/LeonidasY/vlsi-design/blob/main/CP/CP.pdf)
-- [SAT Report](https://github.com/LeonidasY/vlsi-design/blob/main/SAT/SAT.pdf)
-- [SMT Report](https://github.com/LeonidasY/vlsi-design/blob/main/SMT/SMT.pdf)
+- [CP Report](https://github.com/LeonidasY/vlsi-design/blob/main/CP/Report.pdf)
+- [SAT Report](https://github.com/LeonidasY/vlsi-design/blob/main/SAT/Report.pdf)
+- [SMT Report](https://github.com/LeonidasY/vlsi-design/blob/main/SMT/Report.pdf)
 
 ## Results
 The images below show the visualisations of different solved instances using either CP, SAT or SMT.
